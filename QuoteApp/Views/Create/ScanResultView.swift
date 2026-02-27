@@ -110,7 +110,6 @@ private struct BookSearchView: View {
     @State private var bookSearchQuery = ""
     @State private var bookSuggestions: [OpenLibraryBook] = []
     @State private var isSearchingBooks = false
-    @State private var searchTask: Task<Void, Never>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: resultBookSectionSpacing) {
@@ -120,9 +119,6 @@ private struct BookSearchView: View {
             TextField(resultBookSearchPlaceholder, text: $bookSearchQuery)
                 .textFieldStyle(.roundedBorder)
                 .autocorrectionDisabled()
-                .onChange(of: bookSearchQuery) { _, newValue in
-                    runDebouncedBookSearch(query: newValue)
-                }
 
             if isSearchingBooks {
                 HStack(spacing: 6) {
@@ -155,30 +151,26 @@ private struct BookSearchView: View {
                 .frame(maxHeight: resultSuggestionsMaxHeight)
             }
         }
-    }
-
-    private func runDebouncedBookSearch(query: String) {
-        searchTask?.cancel()
-        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            bookSuggestions = []
-            isSearchingBooks = false
-            return
-        }
-        let task = Task {
-            try? await Task.sleep(for: .milliseconds(300))
-            guard !Task.isCancelled else { return }
-            await MainActor.run { isSearchingBooks = true }
-            defer { Task { @MainActor in isSearchingBooks = false } }
+        .task(id: bookSearchQuery) {
+            let trimmed = bookSearchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else {
+                bookSuggestions = []
+                isSearchingBooks = false
+                return
+            }
             do {
-                let results = try await OpenLibraryService.searchBooks(query: query, limit: 10)
-                guard !Task.isCancelled else { return }
-                await MainActor.run { bookSuggestions = results }
+                try await Task.sleep(for: .milliseconds(300))
             } catch {
-                guard !Task.isCancelled else { return }
-                await MainActor.run { bookSuggestions = [] }
+                return
+            }
+            isSearchingBooks = true
+            defer { isSearchingBooks = false }
+            do {
+                bookSuggestions = try await OpenLibraryService.searchBooks(query: trimmed, limit: 10)
+            } catch {
+                if !Task.isCancelled { bookSuggestions = [] }
             }
         }
-        searchTask = task
     }
 }
 

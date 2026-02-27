@@ -10,7 +10,9 @@ struct APIClient: Sendable {
     func get<T: Decodable>(_ path: String) async throws -> T {
         let url = baseURL.appendingPathComponent(path)
         var request = URLRequest(url: url)
-        applyAuthHeader(to: &request)
+        if let token = await TokenStore.token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         let (data, response) = try await URLSession.shared.data(for: request)
         try validateResponse(response)
         return try JSONDecoder().decode(T.self, from: data)
@@ -21,7 +23,9 @@ struct APIClient: Sendable {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        applyAuthHeader(to: &request)
+        if let token = await TokenStore.token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         if let body {
             request.httpBody = try JSONEncoder().encode(AnyEncodable(body))
         }
@@ -35,18 +39,14 @@ struct APIClient: Sendable {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        applyAuthHeader(to: &request)
+        if let token = await TokenStore.token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         if let body {
             request.httpBody = try JSONEncoder().encode(AnyEncodable(body))
         }
         let (_, response) = try await URLSession.shared.data(for: request)
         try validateResponse(response)
-    }
-
-    private func applyAuthHeader(to request: inout URLRequest) {
-        if let token = TokenStore.token {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
     }
 
     private func validateResponse(_ response: URLResponse) throws {

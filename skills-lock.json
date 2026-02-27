@@ -6,6 +6,11 @@
       "sourceType": "github",
       "computedHash": "93c58991e63410069dc5ecb1ed2b99324fef02d8a759a99c1e4fbb613d72fb86"
     },
+    "swift-concurrency": {
+      "source": "avdlee/swift-concurrency-agent-skill",
+      "sourceType": "github",
+      "computedHash": "f799ff819d9d6a1ccef7db0d6cd3d06dbbf7c2c6c514c39b8485d94b31cc251c"
+    },
     "swiftui-expert-skill": {
       "source": "avdlee/swiftui-agent-skill",
       "sourceType": "github",

@@ -19,7 +19,7 @@ extension AuthService {
                 guard let token = response.token, let user = response.user?.domainModel else {
                     throw APIError.decodingError
                 }
-                TokenStore.token = token
+                await MainActor.run { TokenStore.token = token }
                 return user
             },
             signup: { email, password, username in
@@ -28,12 +28,12 @@ extension AuthService {
                 guard let token = response.token, let user = response.user?.domainModel else {
                     throw APIError.decodingError
                 }
-                TokenStore.token = token
+                await MainActor.run { TokenStore.token = token }
                 return user
             },
             logout: {
                 try await client.postEmpty("/auth/logout")
-                TokenStore.clear()
+                await TokenStore.clear()
             },
             getCurrentUser: {
                 let apiModel: UserApiModel = try await client.get("/auth/me")
@@ -58,7 +58,7 @@ extension AuthService {
         },
         logout: {
             try? await Task.sleep(for: .milliseconds(200))
-            TokenStore.clear()
+            await TokenStore.clear()
         },
         getCurrentUser: {
             try? await Task.sleep(for: .milliseconds(300))

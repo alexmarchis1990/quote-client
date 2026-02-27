@@ -27,6 +27,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         Coordinator(onImagePicked: onImagePicked, onCancel: onCancel)
     }
 
+    @MainActor
     final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         var onImagePicked: (UIImage) -> Void
         var onCancel: () -> Void
