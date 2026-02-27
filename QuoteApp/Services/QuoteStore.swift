@@ -16,6 +16,7 @@ final class QuoteStore {
     var comments: [Comment] = []
     var loadingState: LoadingState = .idle
     var commentLoadingState: LoadingState = .idle
+    var actionError: String?
 
     private let service: QuoteService
 
@@ -47,7 +48,7 @@ final class QuoteStore {
                 selectedQuote = updated
             }
         } catch {
-            // Silently fail — optimistic UI could be added later
+            actionError = error.localizedDescription
         }
     }
 
@@ -68,11 +69,16 @@ final class QuoteStore {
             if let index = quotes.firstIndex(where: { $0.id == quoteId }) {
                 quotes[index].comments.append(comment)
             }
-            if selectedQuote?.id == quoteId {
-                selectedQuote?.comments.append(comment)
+            if var updated = selectedQuote, updated.id == quoteId {
+                updated.comments.append(comment)
+                selectedQuote = updated
             }
         } catch {
-            // Handle error if needed
+            actionError = error.localizedDescription
         }
+    }
+
+    func clearActionError() {
+        actionError = nil
     }
 }

@@ -28,5 +28,7 @@ struct RootView: View {
 
 #Preview {
     RootView(authStore: AuthStore(service: .mock))
+        .environment(QuoteStore(service: .mock))
         .environment(\.authService, .mock)
+        .environment(\.quoteService, .mock)
 }

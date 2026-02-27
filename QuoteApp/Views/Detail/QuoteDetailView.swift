@@ -10,8 +10,7 @@ private let commentsSectionTitle = "Comments"
 
 struct QuoteDetailView: View {
     let quote: Quote
-    @Environment(\.quoteService) private var quoteService
-    @State private var store: QuoteStore?
+    @Environment(QuoteStore.self) private var store
     @State private var commentText = ""
 
     var body: some View {
@@ -26,31 +25,36 @@ struct QuoteDetailView: View {
         .navigationTitle(detailNavigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            if store == nil {
-                store = QuoteStore(service: quoteService)
-            }
-            await store?.fetchComments(for: quote.id)
+            await store.fetchComments(for: quote.id)
         }
-        .accessibilityLabel("Quote detail: \(quote.attribution)")
+        .alert("Action Failed", isPresented: Binding(
+            get: { store.actionError != nil },
+            set: { if !$0 { store.clearActionError() } }
+        )) {
+            Button("OK", role: .cancel) { store.clearActionError() }
+        } message: {
+            Text(store.actionError ?? "")
+        }
+        .accessibilityLabel("Quote detail: \(currentQuote.attribution)")
     }
 
     private var currentQuote: Quote {
-        store?.quotes.first(where: { $0.id == quote.id }) ?? quote
+        store.quotes.first(where: { $0.id == quote.id }) ?? quote
     }
 
     private var quoteHeader: some View {
         VStack(alignment: .leading, spacing: detailBlockSpacing) {
-            Text(quote.text)
+            Text(currentQuote.text)
                 .font(.title3)
                 .italic()
 
-            Text(quote.attribution)
+            Text(currentQuote.attribution)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 20) {
                 Button {
-                    Task { await store?.likeQuote(quote) }
+                    Task { await store.likeQuote(quote) }
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: currentQuote.isLiked ? "heart.fill" : "heart")
@@ -60,9 +64,7 @@ struct QuoteDetailView: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(currentQuote.isLiked
-                    ? "Unlike"
-                    : "Like")
+                .accessibilityLabel(currentQuote.isLiked ? "Unlike" : "Like")
 
                 Spacer()
             }
@@ -78,16 +80,14 @@ struct QuoteDetailView: View {
             Text(commentsSectionTitle)
                 .font(.headline)
 
-            if let store {
-                LoadingStateView(state: store.commentLoadingState) {
-                    if store.comments.isEmpty {
-                        Text(noCommentsMessage)
-                            .foregroundStyle(.secondary)
-                            .font(.subheadline)
-                    } else {
-                        ForEach(store.comments) { comment in
-                            CommentView(comment: comment)
-                        }
+            LoadingStateView(state: store.commentLoadingState) {
+                if store.comments.isEmpty {
+                    Text(noCommentsMessage)
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                } else {
+                    ForEach(store.comments) { comment in
+                        CommentView(comment: comment)
                     }
                 }
             }
@@ -105,7 +105,7 @@ struct QuoteDetailView: View {
                 guard !commentText.isEmpty else { return }
                 let text = commentText
                 commentText = ""
-                Task { await store?.addComment(to: quote.id, text: text) }
+                Task { await store.addComment(to: quote.id, text: text) }
             } label: {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.title2)
@@ -121,5 +121,6 @@ struct QuoteDetailView: View {
     NavigationStack {
         QuoteDetailView(quote: Quote.samples[0])
     }
+    .environment(QuoteStore(service: .mock))
     .environment(\.quoteService, .mock)
 }

@@ -4,31 +4,27 @@ private let feedSpacing: CGFloat = 16
 private let feedNavigationTitle = "Quote"
 
 struct FeedView: View {
-    @Environment(\.quoteService) private var quoteService
-    @State private var store: QuoteStore?
+    @Environment(QuoteStore.self) private var store
 
     var body: some View {
-        Group {
-            if let store {
-                LoadingStateView(state: store.loadingState) {
-                    feedContent(store: store)
-                }
-            } else {
-                ProgressView()
-                    .accessibilityLabel("Loading feed")
-            }
+        LoadingStateView(state: store.loadingState) {
+            feedContent
         }
         .navigationTitle(feedNavigationTitle)
         .task {
-            if store == nil {
-                store = QuoteStore(service: quoteService)
-            }
-            await store?.fetchQuotes()
+            await store.fetchQuotes()
+        }
+        .alert("Action Failed", isPresented: Binding(
+            get: { store.actionError != nil },
+            set: { if !$0 { store.clearActionError() } }
+        )) {
+            Button("OK", role: .cancel) { store.clearActionError() }
+        } message: {
+            Text(store.actionError ?? "")
         }
     }
 
-    @ViewBuilder
-    private func feedContent(store: QuoteStore) -> some View {
+    private var feedContent: some View {
         ScrollView {
             LazyVStack(spacing: feedSpacing) {
                 ForEach(store.quotes) { quote in
@@ -55,5 +51,6 @@ struct FeedView: View {
         FeedView()
             .screenDestination()
     }
+    .environment(QuoteStore(service: .mock))
     .environment(\.quoteService, .mock)
 }

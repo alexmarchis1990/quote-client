@@ -62,5 +62,6 @@ struct MainTabView: View {
 
 #Preview {
     MainTabView(authStore: AuthStore(service: .mock))
+        .environment(QuoteStore(service: .mock))
         .environment(\.quoteService, .mock)
 }
