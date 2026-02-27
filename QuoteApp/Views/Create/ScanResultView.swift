@@ -23,11 +23,11 @@ private let resultClearLabel = "Clear"
 struct ScanResultView: View {
     let text: String
     let onTryAgain: () -> Void
-    @State private var editableText: String = ""
+    @State private var editableText = ""
     @State private var detectedLanguageLabel: String?
-    @State private var bookSearchQuery: String = ""
+    @State private var bookSearchQuery = ""
     @State private var bookSuggestions: [OpenLibraryBook] = []
-    @State private var isSearchingBooks: Bool = false
+    @State private var isSearchingBooks = false
     @State private var selectedBook: OpenLibraryBook?
     @State private var searchTask: Task<Void, Never>?
 
@@ -74,7 +74,9 @@ struct ScanResultView: View {
             editableText = text
             let recognizer = NLLanguageRecognizer()
             recognizer.processString(text)
-            detectedLanguageLabel = recognizer.dominantLanguage.map { Locale.current.localizedString(forLanguageCode: $0.rawValue) ?? $0.rawValue }
+            detectedLanguageLabel = recognizer.dominantLanguage.map {
+                Locale.current.localizedString(forLanguageCode: $0.rawValue) ?? $0.rawValue
+            }
         }
     }
 

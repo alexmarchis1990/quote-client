@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "airbnb-swift-style": {
+      "source": "cassiewallace/Airbnb-Swift-Style-Agent-Skill",
+      "sourceType": "github",
+      "computedHash": "93c58991e63410069dc5ecb1ed2b99324fef02d8a759a99c1e4fbb613d72fb86"
+    }
+  }
+}

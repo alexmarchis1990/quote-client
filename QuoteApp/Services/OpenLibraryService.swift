@@ -13,7 +13,13 @@ private struct OpenLibrarySearchResponse: Decodable {
 private struct OpenLibraryDoc: Decodable {
     let key: String?
     let title: String?
-    let author_name: [String]?
+    let authorName: [String]?
+
+    enum CodingKeys: String, CodingKey {
+        case key
+        case title
+        case authorName = "author_name"
+    }
 }
 
 enum OpenLibraryService {
@@ -31,7 +37,7 @@ enum OpenLibraryService {
         let response = try JSONDecoder().decode(OpenLibrarySearchResponse.self, from: data)
         return response.docs.compactMap { doc -> OpenLibraryBook? in
             guard let key = doc.key, let title = doc.title, !title.isEmpty else { return nil }
-            let authorName = doc.author_name?.joined(separator: ", ") ?? ""
+            let authorName = doc.authorName?.joined(separator: ", ") ?? ""
             let id = key.replacingOccurrences(of: "/works/", with: "")
             return OpenLibraryBook(id: id, title: title, authorName: authorName)
         }

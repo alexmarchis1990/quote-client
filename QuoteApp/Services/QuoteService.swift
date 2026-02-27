@@ -135,7 +135,8 @@ extension Quote {
     static let samples: [Quote] = [
         Quote(
             id: "1",
-            text: "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+            text: "It is a truth universally acknowledged, that a single man "
+                + "in possession of a good fortune, must be in want of a wife.",
             author: "Jane Austen",
             bookTitle: "Pride and Prejudice",
             likes: 42,
@@ -162,7 +163,8 @@ extension Quote {
         ),
         Quote(
             id: "4",
-            text: "In the beginning the Universe was created. This has made a lot of people very angry and been widely regarded as a bad move.",
+            text: "In the beginning the Universe was created. This has made a lot "
+                + "of people very angry and been widely regarded as a bad move.",
             author: "Douglas Adams",
             bookTitle: "The Restaurant at the End of the Universe",
             likes: 91,
@@ -174,8 +176,26 @@ extension Quote {
 
 extension Comment {
     static let samples: [Comment] = [
-        Comment(id: "c1", userId: "u1", username: "bookworm42", text: "One of the greatest opening lines in literature!", createdAt: Date().addingTimeInterval(-3600)),
-        Comment(id: "c2", userId: "u2", username: "janeite", text: "Austen's wit is unmatched.", createdAt: Date().addingTimeInterval(-7200)),
-        Comment(id: "c3", userId: "u3", username: "reader_sam", text: "This never gets old.", createdAt: Date().addingTimeInterval(-86400)),
+        Comment(
+            id: "c1",
+            userId: "u1",
+            username: "bookworm42",
+            text: "One of the greatest opening lines in literature!",
+            createdAt: Date().addingTimeInterval(-3600)
+        ),
+        Comment(
+            id: "c2",
+            userId: "u2",
+            username: "janeite",
+            text: "Austen's wit is unmatched.",
+            createdAt: Date().addingTimeInterval(-7200)
+        ),
+        Comment(
+            id: "c3",
+            userId: "u3",
+            username: "reader_sam",
+            text: "This never gets old.",
+            createdAt: Date().addingTimeInterval(-86400)
+        ),
     ]
 }
