@@ -1,5 +1,14 @@
 import SwiftUI
 
+private let profileSpacing: CGFloat = 20
+private let feedTabTag = 0
+private let addTabTag = 1
+private let profileTabTag = 2
+private let feedTabLabel = "Feed"
+private let addTabLabel = "Add"
+private let profileTabLabel = "Profile"
+private let logOutButtonTitle = "Log Out"
+
 struct MainTabView: View {
     var authStore: AuthStore
     @State private var selectedTab = 0
@@ -12,32 +21,41 @@ struct MainTabView: View {
                     .screenDestination()
             }
             .tabItem {
-                Label("Feed", systemImage: "house.fill")
+                Label(feedTabLabel, systemImage: "house.fill")
             }
-            .tag(0)
+            .tag(feedTabTag)
+            .accessibilityLabel(feedTabLabel)
 
             ScanQuoteView()
                 .tabItem {
-                    Label("Add", systemImage: "plus.circle.fill")
+                    Label(addTabLabel, systemImage: "plus.circle.fill")
                 }
-                .tag(1)
+                .tag(addTabTag)
+                .accessibilityLabel(addTabLabel)
 
-            VStack(spacing: 20) {
-                Text("Profile")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-
-                Button("Log Out", role: .destructive) {
-                    Task {
-                        await authStore.logout()
-                    }
+            profileTabContent
+                .tabItem {
+                    Label(profileTabLabel, systemImage: "person.fill")
                 }
-                .buttonStyle(.borderedProminent)
+                .tag(profileTabTag)
+                .accessibilityLabel(profileTabLabel)
+        }
+    }
+
+    private var profileTabContent: some View {
+        VStack(spacing: profileSpacing) {
+            Text(profileTabLabel)
+                .font(.title2)
+                .foregroundStyle(.secondary)
+                .accessibilityAddTraits(.isHeader)
+
+            Button(logOutButtonTitle, role: .destructive) {
+                Task {
+                    await authStore.logout()
+                }
             }
-            .tabItem {
-                Label("Profile", systemImage: "person.fill")
-            }
-            .tag(2)
+            .buttonStyle(.borderedProminent)
+            .accessibilityLabel(logOutButtonTitle)
         }
     }
 }

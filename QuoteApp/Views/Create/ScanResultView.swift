@@ -2,6 +2,24 @@ import NaturalLanguage
 import SwiftUI
 import UIKit
 
+private let resultContentSpacing: CGFloat = 20
+private let resultTextEditorHeight: CGFloat = 160
+private let resultActionSpacing: CGFloat = 16
+private let resultBookSectionSpacing: CGFloat = 8
+private let resultSelectedBookPadding: CGFloat = 8
+private let resultSelectedBookCornerRadius: CGFloat = 8
+private let resultSuggestionsTopPadding: CGFloat = 8
+private let resultSuggestionsMaxHeight: CGFloat = 200
+private let resultBottomPadding: CGFloat = 80
+private let resultNavigationTitle = "Recognized text"
+private let resultDetectedLanguagePrefix = "Detected language: "
+private let resultCopyLabel = "Copy"
+private let resultTryAgainLabel = "Try again"
+private let resultBookSectionTitle = "Book"
+private let resultBookSearchPlaceholder = "Book name or author"
+private let resultSearchingLabel = "Searching…"
+private let resultClearLabel = "Clear"
+
 struct ScanResultView: View {
     let text: String
     let onTryAgain: () -> Void
@@ -15,9 +33,9 @@ struct ScanResultView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: resultContentSpacing) {
                 if let detectedLanguageLabel {
-                    Text("Detected language: \(detectedLanguageLabel)")
+                    Text("\(resultDetectedLanguagePrefix)\(detectedLanguageLabel)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -25,97 +43,110 @@ struct ScanResultView: View {
                 TextEditor(text: $editableText)
                     .font(.body)
                     .scrollContentBackground(.hidden)
-                    .frame(height: 160)
+                    .frame(height: resultTextEditorHeight)
+                    .accessibilityLabel("Recognized text")
 
-                HStack(spacing: 16) {
+                HStack(spacing: resultActionSpacing) {
                     Button {
                         UIPasteboard.general.string = editableText
                     } label: {
-                        Label("Copy", systemImage: "doc.on.doc")
+                        Label(resultCopyLabel, systemImage: "doc.on.doc")
                     }
                     .buttonStyle(.borderedProminent)
+                    .accessibilityLabel(resultCopyLabel)
 
                     Button(role: .cancel, action: onTryAgain) {
-                        Label("Try again", systemImage: "camera")
+                        Label(resultTryAgainLabel, systemImage: "camera")
                     }
                     .buttonStyle(.bordered)
+                    .accessibilityLabel(resultTryAgainLabel)
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Book")
-                        .font(.headline)
-                    TextField("Book name or author", text: $bookSearchQuery)
-                        .textFieldStyle(.roundedBorder)
-                        .autocorrectionDisabled()
-                        .onChange(of: bookSearchQuery) { _, newValue in
-                            runDebouncedBookSearch(query: newValue)
-                        }
-                    if isSearchingBooks {
-                        HStack(spacing: 6) {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                            Text("Searching…")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    if let selectedBook {
-                        HStack {
-                            Text("\(selectedBook.title)\(selectedBook.authorName.isEmpty ? "" : " — \(selectedBook.authorName)")")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            Spacer()
-                            Button("Clear", role: .cancel) {
-                                self.selectedBook = nil
-                            }
-                            .font(.caption)
-                        }
-                        .padding(8)
-                        .background(.ultraThinMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                    if !bookSuggestions.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            ForEach(bookSuggestions) { book in
-                                Button {
-                                    selectedBook = book
-                                    bookSuggestions = []
-                                    bookSearchQuery = ""
-                                } label: {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(book.title)
-                                            .font(.subheadline)
-                                            .foregroundStyle(.primary)
-                                            .multilineTextAlignment(.leading)
-                                        if !book.authorName.isEmpty {
-                                            Text(book.authorName)
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.vertical, 6)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(.top, 8)
-                        .frame(maxHeight: 200)
-                    }
-                }
+                bookSearchSection
             }
             .padding()
-            .padding(.bottom, 80)
+            .padding(.bottom, resultBottomPadding)
         }
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle("Recognized text")
+        .navigationTitle(resultNavigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             editableText = text
             let recognizer = NLLanguageRecognizer()
             recognizer.processString(text)
             detectedLanguageLabel = recognizer.dominantLanguage.map { Locale.current.localizedString(forLanguageCode: $0.rawValue) ?? $0.rawValue }
+        }
+    }
+
+    @ViewBuilder
+    private var bookSearchSection: some View {
+        VStack(alignment: .leading, spacing: resultBookSectionSpacing) {
+            Text(resultBookSectionTitle)
+                .font(.headline)
+
+            TextField(resultBookSearchPlaceholder, text: $bookSearchQuery)
+                .textFieldStyle(.roundedBorder)
+                .autocorrectionDisabled()
+                .onChange(of: bookSearchQuery) { _, newValue in
+                    runDebouncedBookSearch(query: newValue)
+                }
+
+            if isSearchingBooks {
+                HStack(spacing: 6) {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                    Text(resultSearchingLabel)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityLabel(resultSearchingLabel)
+            }
+
+            if let selectedBook {
+                HStack {
+                    Text(selectedBook.authorName.isEmpty ? selectedBook.title : "\(selectedBook.title) — \(selectedBook.authorName)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Spacer()
+                    Button(resultClearLabel, role: .cancel) {
+                        self.selectedBook = nil
+                    }
+                    .font(.caption)
+                }
+                .padding(resultSelectedBookPadding)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: resultSelectedBookCornerRadius))
+            }
+
+            if !bookSuggestions.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(bookSuggestions) { book in
+                        Button {
+                            selectedBook = book
+                            bookSuggestions = []
+                            bookSearchQuery = ""
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(book.title)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.primary)
+                                    .multilineTextAlignment(.leading)
+                                if !book.authorName.isEmpty {
+                                    Text(book.authorName)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.top, resultSuggestionsTopPadding)
+                .frame(maxHeight: resultSuggestionsMaxHeight)
+            }
         }
     }
 

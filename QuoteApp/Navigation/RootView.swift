@@ -7,17 +7,21 @@ struct RootView: View {
         if authStore.isAuthenticated {
             MainTabView(authStore: authStore)
         } else {
-            NavigationStack {
-                LoginView(authStore: authStore)
-                    .navigationDestination(for: Screen.self) { screen in
-                        switch screen {
-                        case .auth(.signup):
-                            SignUpView(authStore: authStore)
-                        default:
-                            EmptyView()
-                        }
+            unauthenticatedContent
+        }
+    }
+
+    private var unauthenticatedContent: some View {
+        NavigationStack {
+            LoginView(authStore: authStore)
+                .navigationDestination(for: Screen.self) { screen in
+                    switch screen {
+                    case .auth(.signup):
+                        SignUpView(authStore: authStore)
+                    default:
+                        EmptyView()
                     }
-            }
+                }
         }
     }
 }

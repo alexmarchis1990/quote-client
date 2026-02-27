@@ -1,11 +1,16 @@
 import SwiftUI
 
+private let cardCornerRadius: CGFloat = 12
+private let cardSpacing: CGFloat = 12
+private let cardShadowRadius: CGFloat = 4
+private let cardShadowY: CGFloat = 2
+
 struct QuoteCardView: View {
     let quote: Quote
     let onLike: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: cardSpacing) {
             Text(quote.text)
                 .font(.body)
                 .italic()
@@ -29,6 +34,7 @@ struct QuoteCardView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(quote.isLiked ? "Unlike, \(quote.likes) likes" : "Like, \(quote.likes) likes")
 
                 HStack(spacing: 4) {
                     Image(systemName: "bubble.right")
@@ -37,14 +43,17 @@ struct QuoteCardView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                .accessibilityLabel("\(quote.commentCount) comments")
 
                 Spacer()
             }
         }
         .padding()
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
+        .clipShape(RoundedRectangle(cornerRadius: cardCornerRadius))
+        .shadow(color: .black.opacity(0.05), radius: cardShadowRadius, y: cardShadowY)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(quote.attribution): \(quote.text)")
     }
 }
 

@@ -1,5 +1,16 @@
 import SwiftUI
 
+private let signUpStackSpacing: CGFloat = 24
+private let signUpFieldSpacing: CGFloat = 16
+private let signUpFieldCornerRadius: CGFloat = 10
+private let signUpHorizontalPadding: CGFloat = 32
+private let signUpTitle = "Create Account"
+private let usernamePlaceholder = "Username"
+private let emailPlaceholder = "Email"
+private let passwordPlaceholder = "Password"
+private let signUpButtonTitle = "Sign Up"
+private let signUpNavigationTitle = "Sign Up"
+
 struct SignUpView: View {
     @Bindable var authStore: AuthStore
     @State private var email = ""
@@ -7,41 +18,43 @@ struct SignUpView: View {
     @State private var username = ""
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: signUpStackSpacing) {
             Spacer()
 
-            Text("Create Account")
+            Text(signUpTitle)
                 .font(.largeTitle.bold())
+                .accessibilityAddTraits(.isHeader)
 
-            VStack(spacing: 16) {
-                TextField("Username", text: $username)
+            VStack(spacing: signUpFieldSpacing) {
+                TextField(usernamePlaceholder, text: $username)
                     .textContentType(.username)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
                     .padding()
                     .background(.fill.tertiary)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .clipShape(RoundedRectangle(cornerRadius: signUpFieldCornerRadius))
 
-                TextField("Email", text: $email)
+                TextField(emailPlaceholder, text: $email)
                     .textContentType(.emailAddress)
                     .keyboardType(.emailAddress)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
                     .padding()
                     .background(.fill.tertiary)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .clipShape(RoundedRectangle(cornerRadius: signUpFieldCornerRadius))
 
-                SecureField("Password", text: $password)
+                SecureField(passwordPlaceholder, text: $password)
                     .textContentType(.newPassword)
                     .padding()
                     .background(.fill.tertiary)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .clipShape(RoundedRectangle(cornerRadius: signUpFieldCornerRadius))
             }
 
             if case .error(let message) = authStore.loadingState {
                 Text(message)
                     .foregroundStyle(.red)
                     .font(.caption)
+                    .accessibilityLabel("Error: \(message)")
             }
 
             Button {
@@ -49,22 +62,25 @@ struct SignUpView: View {
                     await authStore.signup(email: email, password: password, username: username)
                 }
             } label: {
-                if authStore.loadingState == .loading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                } else {
-                    Text("Sign Up")
-                        .frame(maxWidth: .infinity)
+                Group {
+                    if authStore.loadingState == .loading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        Text(signUpButtonTitle)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(email.isEmpty || password.isEmpty || username.isEmpty || authStore.loadingState == .loading)
+            .accessibilityLabel(signUpButtonTitle)
 
             Spacer()
         }
-        .padding(.horizontal, 32)
-        .navigationTitle("Sign Up")
+        .padding(.horizontal, signUpHorizontalPadding)
+        .navigationTitle(signUpNavigationTitle)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

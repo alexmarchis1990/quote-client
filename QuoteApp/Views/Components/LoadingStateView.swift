@@ -8,9 +8,11 @@ struct LoadingStateView<Content: View>: View {
         switch state {
         case .idle:
             Color.clear
+                .accessibilityHidden(true)
         case .loading:
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .accessibilityLabel("Loading")
         case .loaded:
             content()
         case .error(let message):
@@ -19,6 +21,8 @@ struct LoadingStateView<Content: View>: View {
             } description: {
                 Text(message)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Error: \(message)")
         }
     }
 }

@@ -1,5 +1,17 @@
 import SwiftUI
 
+private let scanRecognizingSpacing: CGFloat = 16
+private let scanMainSpacing: CGFloat = 24
+private let scanButtonSpacing: CGFloat = 16
+private let scanHorizontalPadding: CGFloat = 32
+private let scanNavigationTitle = "Scan quote"
+private let scanReadingTextLabel = "Reading text…"
+private let scanAddFromPhotoLabel = "Add from photo"
+private let scanTakePhotoLabel = "Take photo"
+private let scanChooseLibraryLabel = "Choose from library"
+private let scanErrorAlertTitle = "Error"
+private let scanNoTextMessage = "No text was found in the image."
+
 struct ScanQuoteView: View {
     @State private var scanPath: [String] = []
     @State private var showingCamera = false
@@ -11,51 +23,19 @@ struct ScanQuoteView: View {
         NavigationStack(path: $scanPath) {
             Group {
                 if isRecognizing {
-                    VStack(spacing: 16) {
-                        ProgressView()
-                        Text("Reading text…")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    recognizingOverlay
                 } else {
-                    VStack(spacing: 24) {
-                        Text("Add from photo")
-                            .font(.title2)
-                            .foregroundStyle(.secondary)
-
-                        VStack(spacing: 16) {
-                            Button {
-                                showingCamera = true
-                            } label: {
-                                Label("Take photo", systemImage: "camera.fill")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .controlSize(.large)
-
-                            Button {
-                                showingLibrary = true
-                            } label: {
-                                Label("Choose from library", systemImage: "photo.on.rectangle.angled")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.bordered)
-                            .controlSize(.large)
-                        }
-                        .padding(.horizontal, 32)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    scanSourceButtons
                 }
             }
-            .navigationTitle("Scan quote")
+            .navigationTitle(scanNavigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: String.self) { text in
                 ScanResultView(text: text) {
                     scanPath = []
                 }
             }
-            .alert("Error", isPresented: .init(
+            .alert(scanErrorAlertTitle, isPresented: .init(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil; isRecognizing = false } }
             )) {
@@ -73,9 +53,7 @@ struct ScanQuoteView: View {
                         showingCamera = false
                         recognizeText(from: image)
                     },
-                    onCancel: {
-                        showingCamera = false
-                    }
+                    onCancel: { showingCamera = false }
                 )
             }
             .fullScreenCover(isPresented: $showingLibrary) {
@@ -85,12 +63,53 @@ struct ScanQuoteView: View {
                         showingLibrary = false
                         recognizeText(from: image)
                     },
-                    onCancel: {
-                        showingLibrary = false
-                    }
+                    onCancel: { showingLibrary = false }
                 )
             }
         }
+    }
+
+    private var recognizingOverlay: some View {
+        VStack(spacing: scanRecognizingSpacing) {
+            ProgressView()
+            Text(scanReadingTextLabel)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityLabel(scanReadingTextLabel)
+    }
+
+    private var scanSourceButtons: some View {
+        VStack(spacing: scanMainSpacing) {
+            Text(scanAddFromPhotoLabel)
+                .font(.title2)
+                .foregroundStyle(.secondary)
+
+            VStack(spacing: scanButtonSpacing) {
+                Button {
+                    showingCamera = true
+                } label: {
+                    Label(scanTakePhotoLabel, systemImage: "camera.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .accessibilityLabel(scanTakePhotoLabel)
+
+                Button {
+                    showingLibrary = true
+                } label: {
+                    Label(scanChooseLibraryLabel, systemImage: "photo.on.rectangle.angled")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .accessibilityLabel(scanChooseLibraryLabel)
+            }
+            .padding(.horizontal, scanHorizontalPadding)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func recognizeText(from image: UIImage) {
@@ -102,7 +121,7 @@ struct ScanQuoteView: View {
                 await MainActor.run {
                     isRecognizing = false
                     if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        errorMessage = "No text was found in the image."
+                        errorMessage = scanNoTextMessage
                     } else {
                         scanPath = [text]
                     }
