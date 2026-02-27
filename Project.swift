@@ -10,6 +10,7 @@ let project = Project(
             bundleId: "com.quote.QuoteApp",
             deploymentTargets: .iOS("17.0"),
             infoPlist: .extendingDefault(with: [
+                "UILaunchScreen": [:],
                 "NSCameraUsageDescription": "Quote uses the camera to capture text from book pages.",
                 "NSPhotoLibraryUsageDescription": "Quote uses the photo library to select an image for text recognition.",
                 "UISupportedInterfaceOrientations": [
