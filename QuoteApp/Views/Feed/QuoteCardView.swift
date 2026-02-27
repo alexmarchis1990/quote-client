@@ -34,7 +34,9 @@ struct QuoteCardView: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(quote.isLiked ? "Unlike, \(quote.likes) likes" : "Like, \(quote.likes) likes")
+                .accessibilityLabel(quote.isLiked
+                    ? "Unlike, \(quote.likes) likes"
+                    : "Like, \(quote.likes) likes")
 
                 HStack(spacing: 4) {
                     Image(systemName: "bubble.right")

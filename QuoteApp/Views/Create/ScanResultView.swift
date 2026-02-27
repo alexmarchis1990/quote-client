@@ -104,7 +104,9 @@ struct ScanResultView: View {
 
             if let selectedBook {
                 HStack {
-                    Text(selectedBook.authorName.isEmpty ? selectedBook.title : "\(selectedBook.title) — \(selectedBook.authorName)")
+                    Text(selectedBook.authorName.isEmpty
+                        ? selectedBook.title
+                        : "\(selectedBook.title) — \(selectedBook.authorName)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

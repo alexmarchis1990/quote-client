@@ -60,7 +60,9 @@ struct QuoteDetailView: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(currentQuote.isLiked ? "Unlike" : "Like")
+                .accessibilityLabel(currentQuote.isLiked
+                    ? "Unlike"
+                    : "Like")
 
                 Spacer()
             }

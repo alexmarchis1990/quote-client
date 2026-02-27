@@ -70,7 +70,9 @@ extension QuoteService {
                 throw APIError.invalidResponse
             }
             quote.isLiked.toggle()
-            quote.likes += quote.isLiked ? 1 : -1
+            quote.likes += quote.isLiked
+                ? 1
+                : -1
             return quote
         },
         fetchComments: { _ in

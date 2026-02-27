@@ -11,13 +11,8 @@ struct CommentApiModel: ApiModel {
 extension CommentApiModel {
     var domainModel: Comment? {
         guard let id, let userId, let username, let text else { return nil }
-        let date: Date
-        if let createdAt {
-            let formatter = ISO8601DateFormatter()
-            date = formatter.date(from: createdAt) ?? Date()
-        } else {
-            date = Date()
-        }
+        let formatter = ISO8601DateFormatter()
+        let date = createdAt.flatMap { formatter.date(from: $0) } ?? Date()
         return Comment(
             id: id,
             userId: userId,

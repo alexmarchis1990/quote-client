@@ -30,7 +30,11 @@ enum TextRecognitionService {
             }
             request.recognitionLevel = .accurate
             request.recognitionLanguages = ["ro", "en-US"]
-            let handler = VNImageRequestHandler(cgImage: cgImage, orientation: CGImagePropertyOrientation(image.imageOrientation), options: [:])
+            let handler = VNImageRequestHandler(
+                cgImage: cgImage,
+                orientation: CGImagePropertyOrientation(image.imageOrientation),
+                options: [:]
+            )
             do {
                 try handler.perform([request])
             } catch {

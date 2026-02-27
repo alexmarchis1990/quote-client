@@ -33,6 +33,8 @@ struct DiskCache: Sendable {
 
     private func fileURL(for key: String, typeId: String) -> URL {
         let sanitized = "\(typeId)_\(key)".addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? key
-        return directory.appendingPathComponent(sanitized).appendingPathExtension("json")
+        return directory
+            .appendingPathComponent(sanitized)
+            .appendingPathExtension("json")
     }
 }
