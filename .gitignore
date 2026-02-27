@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Tuist generated
+*.xcodeproj
+*.xcworkspace
+
+# Build
+DerivedData/
+build/
+
+# Tuist dependencies (if used later)
+Tuist/Dependencies/
