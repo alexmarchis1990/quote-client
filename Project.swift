@@ -37,5 +37,20 @@ let project = Project(
                 ]
             )
         ),
+        .target(
+            name: "QuoteAppTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.quote.QuoteAppTests",
+            deploymentTargets: .iOS("17.0"),
+            sources: ["QuoteAppTests/**/*.swift"],
+            dependencies: [.target(name: "QuoteApp")],
+            settings: .settings(
+                base: [
+                    "SWIFT_VERSION": "6.0",
+                    "SWIFT_STRICT_CONCURRENCY": "complete",
+                ]
+            )
+        ),
     ]
 )
